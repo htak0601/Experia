@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+
 @theme {
   /* breakpoints */
   --breakpoint-sm: 520px; /* mobile ~ mini tablet */

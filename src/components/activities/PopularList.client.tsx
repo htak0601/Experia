@@ -1,14 +1,12 @@
 'use client';
 
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { BREAKPOINTS, POPULAR_ACTIVITIES_VIEW_COUNT } from '@/constants';
 import { PopularActivities } from '@/types/schema/activitiesSchema';
 import { InfiniteData } from '@tanstack/react-query';
-import PopularItem from './PopularItem';
-import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { BREAKPOINTS, POPULAR_ACTIVITIES_VIEW_COUNT } from '@/constants';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import PopularItem from './PopularItem';
 
 interface PopularListProps {
   data: InfiniteData<PopularActivities, string | null>;
