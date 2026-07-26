@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import InputField from '@/components/InputField';
 import useDebounce from '@/hooks/useDebounce';
@@ -14,24 +14,26 @@ interface SearchBarProps {
 const SearchBarClient = ({ onSearch, initialQuery }: SearchBarProps) => {
   const [query, setQuery] = useState(initialQuery ?? '');
   const debounceQuery = useDebounce(query, 500);
+  const isUserInput = useRef(false);
 
-  // 초기 검색어 반영
+  // URL 검색어 변경 시 입력값 동기화
   useEffect(() => {
+    isUserInput.current = false;
     setQuery(initialQuery ?? '');
   }, [initialQuery]);
 
-  // 디바운스된 검색어로 검색
+  const handleChange = (value: string) => {
+    isUserInput.current = true;
+    setQuery(value);
+  };
+
+  // 사용자 입력에 debounce 검색 실행
   useEffect(() => {
-    const currentQuery = initialQuery?.trim() ?? '';
-    const debouncedQuery = debounceQuery.trim();
+    if (!isUserInput.current) return;
 
-    // URL에 이미 반영된 검색어라면 다시 검색하지 않음
-    if (debouncedQuery === currentQuery) {
-      return;
-    }
-
-    onSearch(debouncedQuery);
-  }, [debounceQuery, initialQuery, onSearch]);
+    onSearch(debounceQuery.trim());
+    isUserInput.current = false;
+  }, [debounceQuery, onSearch]);
 
   return (
     <section className='bg-gray-100 px-4 py-10 md:py-20'>
@@ -46,7 +48,7 @@ const SearchBarClient = ({ onSearch, initialQuery }: SearchBarProps) => {
               type='text'
               name='query'
               value={query}
-              onChange={e => setQuery(e.target.value)}
+              onChange={e => handleChange(e.target.value)}
               placeholder='내가 원하는 체험은...'
               className='focus:border-nomad-black w-full rounded-full border border-transparent bg-white px-5 py-4 pr-20 text-base shadow focus:border focus:ring-0 focus:outline-none lg:text-lg'
             />
