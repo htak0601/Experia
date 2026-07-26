@@ -22,32 +22,43 @@ const PopularList = ({
   isFetchingNextPage,
 }: PopularListProps) => {
   const isFetchingMore = hasNextPage && isFetchingNextPage;
+
   return (
     <div className='relative'>
       <Swiper
-        slidesPerView={POPULAR_ACTIVITIES_VIEW_COUNT.sm} // 모바일 기본
-        spaceBetween={16} // 슬라이드 간격
+        className='w-full'
+        slidesPerView={POPULAR_ACTIVITIES_VIEW_COUNT.sm}
+        spaceBetween={16}
         breakpoints={{
-          [BREAKPOINTS.md]: { slidesPerView: POPULAR_ACTIVITIES_VIEW_COUNT.md }, // 720px 이상
-          [BREAKPOINTS.lg]: { slidesPerView: POPULAR_ACTIVITIES_VIEW_COUNT.lg }, // 1280px 이상
+          [BREAKPOINTS.md]: {
+            slidesPerView: POPULAR_ACTIVITIES_VIEW_COUNT.md,
+          },
+          [BREAKPOINTS.lg]: {
+            slidesPerView: POPULAR_ACTIVITIES_VIEW_COUNT.lg,
+          },
         }}
-        navigation // 좌우 버튼
-        grabCursor // 마우스 드래그 가능
-        modules={[Navigation]} // Swiper 모듈 등록
+        navigation
+        grabCursor
+        modules={[Navigation]}
         onReachEnd={() => {
-          if (hasNextPage) fetchNextPage();
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
         }}
       >
         {data.pages.map(page =>
-          page.activities.map((activity, i) => (
+          page.activities.map(activity => (
             <SwiperSlide key={activity.id}>
-              <PopularItem item={activity} idx={i} />
+              <PopularItem item={activity} />
             </SwiperSlide>
           )),
         )}
+
         {isFetchingMore && (
-          <SwiperSlide className='flex w-auto items-center justify-center'>
-            <LoadingSpinner />
+          <SwiperSlide>
+            <div className='flex aspect-square w-full items-center justify-center'>
+              <LoadingSpinner />
+            </div>
           </SwiperSlide>
         )}
       </Swiper>
