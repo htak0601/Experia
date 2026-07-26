@@ -1,9 +1,10 @@
 'use client';
+
 import Image from 'next/image';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import InputField from '@/components/InputField';
-import debounce from '@/utils/debounce';
+import useDebounce from '@/hooks/useDebounce';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -12,35 +13,25 @@ interface SearchBarProps {
 
 const SearchBarClient = ({ onSearch, initialQuery }: SearchBarProps) => {
   const [query, setQuery] = useState(initialQuery ?? '');
-  const debouncedOnSearchRef = useRef(debounce(onSearch, 500));
+  const debounceQuery = useDebounce(query, 500);
 
   // 초기 검색어 반영
   useEffect(() => {
     setQuery(initialQuery ?? '');
   }, [initialQuery]);
 
-  // query 변경 시 디바운스 검색 호출
+  // 디바운스된 검색어로 검색
   useEffect(() => {
-    const debouncedSearch = debouncedOnSearchRef.current;
-    debouncedSearch(query);
+    const currentQuery = initialQuery?.trim() ?? '';
+    const debouncedQuery = debounceQuery.trim();
 
-    // 컴포넌트 언마운트 시 디바운스 취소
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, [query]);
-
-  const handleSearch = () => {
-    onSearch(query.trim());
-  };
-
-  // 엔터키
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
+    // URL에 이미 반영된 검색어라면 다시 검색하지 않음
+    if (debouncedQuery === currentQuery) {
+      return;
     }
-  };
+
+    onSearch(debouncedQuery);
+  }, [debounceQuery, initialQuery, onSearch]);
 
   return (
     <section className='bg-gray-100 px-4 py-10 md:py-20'>
@@ -56,14 +47,13 @@ const SearchBarClient = ({ onSearch, initialQuery }: SearchBarProps) => {
               name='query'
               value={query}
               onChange={e => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder='내가 원하는 체험은...'
               className='focus:border-nomad-black w-full rounded-full border border-transparent bg-white px-5 py-4 pr-20 text-base shadow focus:border focus:ring-0 focus:outline-none lg:text-lg'
             />
+
             <button
-              type='button'
+              type='submit'
               aria-label='검색'
-              onClick={handleSearch}
               className='absolute top-1/2 -right-1 -translate-y-1/2'
             >
               <Image src='/icons/ic_SearchIcon.svg' alt='검색 아이콘' width={68} height={68} />
@@ -74,5 +64,5 @@ const SearchBarClient = ({ onSearch, initialQuery }: SearchBarProps) => {
     </section>
   );
 };
-// React.memo로 감싸서 불필요한 리렌더링 방지
+
 export default React.memo(SearchBarClient);
